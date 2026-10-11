@@ -10,10 +10,8 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js"
-    onerror="this.onerror=null; this.src='https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js';"></script>
-
-
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/browser@latest/umd/zxing-browser.min.js"
+    onerror="this.onerror=null; this.src='https://unpkg.com/@zxing/browser@latest/umd/zxing-browser.min.js';"></script>
 
   <style>
     * {
@@ -2039,112 +2037,48 @@
 
 
     async function startCamera() {
-
       stopCamera();
 
-
-
       if (!scanner) {
-
         $('cameraStatus').textContent = 'Scanner is not ready. Close and reopen the scanner.';
-
         return;
-
       }
-
-
 
       $('cameraStatus').textContent = 'Requesting camera permission...';
 
-
-
       try {
-
-        const stream = await navigator.mediaDevices.getUserMedia({
-
-          video: { facingMode: { ideal: cameraFacing } },
-
-          audio: false
-
-        });
-
-
-
-        stream.getTracks().forEach(track => track.stop());
-
-
-
-        $('cameraStatus').textContent = 'Permission granted. Starting scanner...';
-
-
-
-        cameraControls = await scanner.decodeFromVideoDevice(
-
-          undefined,
-
+        cameraControls = await scanner.decodeFromConstraints(
+          { video: { facingMode: { ideal: cameraFacing } } },
           $('cameraVideo'),
-
           (result, error) => {
-
             if (result && scanTarget) {
-
               const code = result.getText();
-
-
-
               if (code) {
-
                 scanTarget.value = code;
-
                 scanTarget.dispatchEvent(new Event('input', { bubbles: true }));
-
                 scanTarget.dispatchEvent(new Event('change', { bubbles: true }));
-
                 closeScanner();
-
               }
-
             }
-
           }
-
         );
 
-
-
         $('cameraStatus').textContent =
-
           'Camera ready. Hold the barcode steady in front of the camera.';
-
       } catch (error) {
-
         let message = errorText(error);
 
-
-
         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-
           message = 'Camera permission denied. Allow camera access in browser settings, then retry.';
-
         } else if (error.name === 'NotFoundError') {
-
           message = 'No camera was found on this device.';
-
         } else if (error.name === 'NotReadableError') {
-
           message = 'The camera may be in use by another app. Close other camera apps and retry.';
-
         }
 
-
-
         $('cameraStatus').textContent = message;
-
       }
-
     }
-
-
 
     function stopCamera() {
 
