@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Q MART | SKU Location Entry</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        :root { --blue: #2457d6; --dark: #10203e; --bg: #f3f6fb; --border: #dce3ee; }
+        body { margin: 0; width: 100%; font-family: Arial, sans-serif; color: #1c2940; background: var(--bg); overflow-x: hidden; }
+        header { padding: 20px 16px; color: white; background: linear-gradient(120deg, #10203e, #2457a7); }
+        header h1 { margin: 0 0 7px; font-size: 21px; }
+        header p { margin: 0; font-size: 12px; color: #dbe6ff; }
+        main { width: 100%; max-width: 1100px; margin: auto; padding: 14px; }
+        .card { width: 100%; min-width: 0; background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 16px #182c5008; }
+        h2 { font-size: 19px; margin: 0; }
+        .sub { color: #718097; font-size: 13px; margin-top: 7px; }
+        button { min-height: 46px; border: 0; border-radius: 10px; padding: 12px 15px; font-size: 14px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
+        button:disabled { opacity: .55; cursor: not-allowed; }
+        .primary { background: var(--blue); color: white; }
+        .secondary { background: #eaf0fb; color: #214b9e; }
+        .outline { background: white; color: #26364e; border: 1px solid var(--border); }
+        .danger { background: #fff0f0; color: #a32424; }
+        .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+        .actions button { flex: 1 1 180px; }
+        .barcode-line { min-width: 0; padding: 14px; margin-top: 14px; background: #fbfcff; border: 1px solid var(--border); border-radius: 12px; }
+        .line-title { font-size: 14px; font-weight: bold; color: #2457a7; margin-bottom: 12px; }
+        .line-fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+        label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 7px; }
+        input, select { width: 100%; min-width: 0; height: 46px; padding: 0 11px; border: 1px solid #cbd5e3; border-radius: 9px; background: white; color: #1c2940; font-size: 16px; }
+        input:focus, select:focus { outline: 2px solid #d9e5ff; border-color: var(--blue); }
+        input[readonly] { background: #edf3ff; }
+        .barcode-entry { display: flex; gap: 7px; align-items: center; }
+        .barcode-entry input { flex: 1; width: 100%; }
+        .scan-btn { flex: 0 0 auto; padding: 10px 12px; }
+        .line-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+        #locationPanel { display: none; }
+        #locationPanel.open { display: block; }
+        .location-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+        .section-label { grid-column: 1/-1; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: .5px; color: #51617a; padding-bottom: 9px; border-bottom: 1px solid #e6ebf3; }
+        .message { display: none; padding: 12px; border-radius: 9px; margin-top: 14px; font-size: 14px; overflow-wrap: anywhere; }
+        .success { display: block; background: #e8f7ee; color: #11643b; }
+        .error { display: block; background: #fff0f0; color: #a32424; }
+        .info { display: block; background: #edf4ff; color: #254d8e; }
+        .toolbar { display: flex; gap: 10px; margin-top: 16px; }
+        .toolbar input { flex: 1; }
+        .table-wrap { overflow-x: auto; margin-top: 14px; }
+        table { width: 100%; min-width: 1000px; border-collapse: collapse; font-size: 13px; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e8edf4; white-space: nowrap; }
+        th { background: #f5f7fb; font-size: 11px; }
+        .count { color: #718097; font-size: 13px; margin-top: 12px; }
+        .empty { text-align: center; padding: 24px; color: #718097; }
+        .camera-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: #07101e; color: white; padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom)); overflow-y: auto; }
+        .camera-overlay.open { display: flex; flex-direction: column; align-items: center; }
+        .camera-inner { width: 100%; max-width: 600px; }
+        .camera-inner h2 { margin: 12px 0; }
+        #cameraVideo { width: 100%; max-height: 60vh; min-height: 220px; object-fit: cover; background: black; border-radius: 14px; margin-top: 12px; }
+        #cameraStatus { margin: 12px 0; font-size: 14px; overflow-wrap: anywhere; }
+        .camera-actions { display: flex; gap: 10px; width: 100%; }
+        .camera-actions button { flex: 1; }
+        footer { text-align: center; color: #8490a4; font-size: 12px; padding: 8px 12px 22px; }
+        @media(max-width:650px) {
+            header { padding: 17px 14px; }
+            header h1 { font-size: 18px; }
+            main { padding: 9px; }
+            .card { padding: 13px; border-radius: 11px; }
+            .line-fields, .location-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+            .actions { flex-direction: column; }
+            .actions button { width: 100%; flex: auto; }
+            .toolbar { flex-direction: column; }
+            .toolbar button { width: 100%; }
+            .barcode-entry { gap: 6px; }
+            .scan-btn { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Q MART | SKU LOCATION ENTRY</h1>
+        <p>BARCODE SCANNING · SHELF ALLOCATION · INVENTORY</p>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>SKU Location Form</h2>
+            <div class="sub">Enter or scan barcodes, add multiple products, then select their shelf location.</div>
+
+            <form id="skuForm">
+                <div class="actions">
+                    <button type="button" class="secondary" id="nextBtn">+ Next / Add Barcode Line</button>
+                </div>
+
+                <div id="barcodeLines"></div>
+
+                <div class="actions">
+                    <button type="button" class="outline" id="locationBtn">Select Shelf Location ▼</button>
+                </div>
+
+                <div id="locationPanel" class="card" style="margin-top:14px;">
+                    <h2>Shelf Location Options</h2>
+                    <div class="sub">Select Fixture first. The remaining options load from Shelf_Master.</div>
+
+                    <div class="location-grid">
+                        <div class="section-label">Select Shelf Location</div>
+                        <div><label for="fixtureLocation">Fixture *</label><select id="fixtureLocation" required disabled><option value="">Loading Fixture...</option></select></div>
+                        <div><label for="fixtureSet">Fixture Set *</label><select id="fixtureSet" required disabled><option value="">Select Fixture Set</option></select></div>
+                        <div><label for="partNo">Part No *</label><select id="partNo" required disabled><option value="">Select Part No</option></select></div>
+                        <div><label for="zone">Zone *</label><select id="zone" required disabled><option value="">Select Zone</option></select></div>
+                        <div><label for="zoneNo">Zone No *</label><select id="zoneNo" required disabled><option value="">Select Zone No</option></select></div>
+                        <div><label for="side">Side *</label><select id="side" required disabled><option value="">Select Side</option></select></div>
+                        <div><label for="tierNo">Level / Tier No *</label><select id="tierNo" required disabled><option value="">Select Tier No</option></select></div>
+                        
+                        <div class="section-label">Automatic Location Details</div>
+                        <div><label for="shelfId">Shelf ID</label><input id="shelfId" readonly placeholder="Auto-filled"></div>
+                        <div><label for="fixtureAuto">Fixture Detail</label><input id="fixtureAuto" readonly placeholder="Auto-filled"></div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="button" class="secondary" id="reloadBtn">Reload Shelf Master</button>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="primary" id="saveBtn">Save All SKUs</button>
+                    <button type="button" class="secondary" id="clearBtn">Clear Form</button>
+                </div>
+
+                <div id="message" class="message" role="status" aria-live="polite"></div>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Saved SKU Records</h2>
+            <div class="sub">Latest saved records appear first.</div>
+
+            <div class="toolbar">
+                <input id="searchBox" placeholder="Search barcode, shelf, zone or position">
+                <button type="button" class="secondary" id="refreshBtn">Refresh Records</button>
+            </div>
+
+            <div class="count" id="recordCount">Loading records...</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Barcode</th><th>Facings</th><th>Position</th><th>Shelf ID</th>
+                            <th>Fixture</th><th>Fixture Set</th><th>Part No</th><th>Zone</th>
+                            <th>Zone No</th><th>Side</th><th>Level / Tier</th><th>Saved At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody">
+                        <tr><td colspan="13" class="empty">Loading records...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>Q MART · SKU LOCATION MANAGEMENT</footer>
+
+    <div id="cameraOverlay" class="camera-overlay" role="dialog" aria-modal="true">
+        <div class="camera-inner">
+            <h2>Scan Barcode</h2>
+            <div>Allow camera access and hold the barcode steady inside the camera view.</div>
+            <video id="cameraVideo" autoplay muted playsinline></video>
+            <div id="cameraStatus" aria-live="polite">Starting camera...</div>
+            <div class="camera-actions">
+                <button type="button" class="primary" id="switchCameraBtn">Switch Camera</button>
+                <button type="button" class="danger" id="closeCameraBtn">Close Scanner</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        // ⚠️ REPLACE THIS WITH YOUR DEPLOYED WEB APP URL ⚠️
+        const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+
+        let shelfRows = [];
+        let allRecords = [];
+        let saving = false;
+        let scanner = null;
+        let cameraControls = null;
+        let scanTarget = null;
+        let cameraFacing = 'environment';
+
+        const $ = id => document.getElementById(id);
+
+        const fields = [
+            { id:'fixtureLocation', key:'fixture', label:'Fixture' },
+            { id:'fixtureSet', key:'fixtureSet', label:'Fixture Set' },
+            { id:'partNo', key:'partNo', label:'Part No' },
+            { id:'zone', key:'zone', label:'Zone' },
+            { id:'zoneNo', key:'zoneNo', label:'Zone No' },
+            { id:'side', key:'side', label:'Side' },
+            { id:'tierNo', key:'tierNo', label:'Tier No' }
+        ];
+
+        function errorText(error) {
+            return error && error.message ? error.message : String(error || 'Unknown error');
+        }
+
+        function showMessage(text, type) {
+            $('message').className = 'message ' + type;
+            $('message').textContent = text;
+        }
+
+        function clearMessage() {
+            $('message').className = 'message';$('message').textContent = '';
+        }
+
+        function uniqueSorted(values) {
+            return [...new Set(values.map(v => String(v == null ? '' : v).trim()).filter(Boolean))]
+                .sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
+        }
+
+        function fillSelect(select, values, label) {
+            select.replaceChildren();
+            const first = document.createElement('option');
+            first.value = '';
+            first.textContent = 'Select ' + label;
+            select.appendChild(first);
+
+            uniqueSorted(values).forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+        }
+
+        function resetLocationFields(startIndex) {
+            for (let i = startIndex; i < fields.length; i++) {
+                const field = fields[i];
+                fillSelect($(field.id), [], field.label);$(field.id).disabled = true;
+            }
+            $('shelfId').value = '';$('fixtureAuto').value = '';
+        }
+
+        function loadOptions(index) {
+            if (index >= fields.length) { updateShelf(); return; }
+
+            const current = fields[index];
+            const filters = {};
+
+            for (let i = 0; i < index; i++) {
+                filters[fields[i].key] = $(fields[i].id).value;
+            }
+
+            const normalizeValue = value => String(value == null ? '' : value).trim().replace(/\s+/g, ' ').toLowerCase();
+            const matches = shelfRows.filter(row => Object.keys(filters).every(key => normalizeValue(row[key]) === normalizeValue(filters[key])));
+
+            fillSelect($(current.id), matches.map(row => row[current.key]), current.label);
+            $(current.id).disabled = index > 0 && !$(fields[index - 1].id).value;
+            resetLocationFields(index + 1);
+            updateShelf();
+        }
+
+        function updateShelf() {
+            $('shelfId').value = '';$('fixtureAuto').value = '';
+            if (!fields.every(field => $(field.id).value)) return;
+
+            const matches = shelfRows.filter(row => fields.every(field => String(row[field.key] == null ? '' : row[field.key]).trim() === $(field.id).value.trim()));
+
+            if (!matches.length) { showMessage('No matching Shelf ID found.', 'error'); return; }
+            
+            $('shelfId').value = matches[0].shelfId \vert{}\vert{} '';$('fixtureAuto').value = matches[0].fixture || '';
+            if (!$('shelfId').value) { showMessage('Selected location has no Shelf ID.', 'error'); return; }
+            if (matches.length > 1) { showMessage('Multiple rows match. Using the first Shelf ID: ' + matches[0].shelfId, 'info'); } else { clearMessage(); }
+        }
+
+        function loadShelfMaster() {
+            $('reloadBtn').disabled = true;
+            showMessage('Loading shelf options...', 'info');
+
+            fetch(`${API_URL}?action=getShelfData`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    
+                    shelfRows = data && Array.isArray(data.rows) ? data.rows : [];
+                    fields.forEach(field => {
+                        fillSelect($(field.id), [], field.label);$(field.id).disabled = true;
+                    });
+                    $('shelfId').value = '';$('fixtureAuto').value = '';
+
+                    if (!shelfRows.length) {
+                        $('reloadBtn').disabled = false;
+                        showMessage('No shelf rows returned.', 'error');
+                        return;
+                    }
+
+                    loadOptions(0);
+                    $('reloadBtn').disabled = false;
+                    showMessage('Shelf Master loaded: ' + shelfRows.length + ' row(s).', 'success');
+                })
+                .catch(error => {
+                    $('reloadBtn').disabled = false;
+                    showMessage('Shelf Master error: ' + errorText(error), 'error');
+                });
+        }
+
+        function makeBarcodeLine() {
+            const line = document.createElement('div');
+            line.className = 'barcode-line';
+
+            const title = document.createElement('div');
+            title.className = 'line-title';
+            line.appendChild(title);
+
+            const grid = document.createElement('div');
+            grid.className = 'line-fields';
+
+            const barcodeWrap = document.createElement('div');
+            const barcodeLabel = document.createElement('label');
+            barcodeLabel.textContent = 'Barcode *';
+
+            const barcodeEntry = document.createElement('div');
+            barcodeEntry.className = 'barcode-entry';
+
+            const barcode = document.createElement('input');
+            barcode.className = 'line-barcode';
+            barcode.required = true;
+            barcode.autocomplete = 'off';
+            barcode.inputMode = 'text';
+            barcode.placeholder = 'Type or scan barcode';
+
+            const scan = document.createElement('button');
+            scan.type = 'button';
+            scan.className = 'secondary scan-btn';
+            scan.textContent = '📷 Scan';
+            scan.addEventListener('click', () => openScanner(barcode));
+
+            barcodeEntry.append(barcode, scan);
+            barcodeWrap.append(barcodeLabel, barcodeEntry);
+
+            const facingsWrap = document.createElement('div');
+            const facingsLabel = document.createElement('label');
+            facingsLabel.textContent = 'Facings *';
+            const facings = document.createElement('input');
+            facings.className = 'line-facings';
+            facings.type = 'number';
+            facings.min = '1';
+            facings.step = '1';
+            facings.required = true;
+            facings.placeholder = 'Facings';
+            facingsWrap.append(facingsLabel, facings);
+
+            const positionWrap = document.createElement('div');
+            const positionLabel = document.createElement('label');
+            positionLabel.textContent = 'Position *';
+            const position = document.createElement('input');
+            position.className = 'line-position';
+            position.required = true;
+            position.placeholder = 'Position';
+            positionWrap.append(positionLabel, position);
+
+            grid.append(barcodeWrap, facingsWrap, positionWrap);
+            line.appendChild(grid);
+
+            const lineActions = document.createElement('div');
+            lineActions.className = 'line-actions';
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'danger';
+            remove.textContent = 'Remove Line';
+
+            remove.addEventListener('click', () => {
+                if ($('barcodeLines').children.length <= 1) { showMessage('At least one barcode line is required.', 'info'); return; }
+                line.remove();
+                renumberLines();
+            });
+
+            lineActions.appendChild(remove);
+            line.appendChild(lineActions);
+            return line;
+        }
+
+        function renumberLines() {
+            const lines = [...document.querySelectorAll('.barcode-line')];
+            lines.forEach((line, index) => {
+                line.querySelector('.line-title').textContent = 'Barcode Line ' + (index + 1);
+                const remove = line.querySelector('.line-actions button');
+                if (remove) { remove.style.visibility = lines.length === 1 ? 'hidden' : 'visible'; }
+            });
+        }
+
+        function addLine() {
+            clearMessage();
+            const lines = [...document.querySelectorAll('.barcode-line')];
+            const last = lines[lines.length - 1];
+
+            if (!last.querySelector('.line-barcode').value.trim()) { last.querySelector('.line-barcode').focus(); showMessage('Enter or scan the barcode before adding the next line.', 'error'); return; }
+            const facings = last.querySelector('.line-facings').value;
+            if (!facings || Number(facings) < 1 || !Number.isInteger(Number(facings))) { last.querySelector('.line-facings').focus(); showMessage('Enter valid Facings before adding the next line.', 'error'); return; }
+            if (!last.querySelector('.line-position').value.trim()) { last.querySelector('.line-position').focus(); showMessage('Enter Position before adding the next line.', 'error'); return; }
+            if (lines.length >= 500) { showMessage('Maximum 500 barcode lines per batch.', 'error'); return; }
+
+            $('barcodeLines').appendChild(makeBarcodeLine());
+            renumberLines();
+            const newLine = $('barcodeLines').lastElementChild;
+            newLine.querySelector('.line-barcode').focus();
+            newLine.scrollIntoView({behavior:'smooth', block:'center'});
+        }
+
+        // --- CAMERA LOGIC FOR GITHUB PAGES ---
+        async function openScanner(input) {
+            scanTarget = input;
+            cameraFacing = 'environment';
+            $('cameraOverlay').classList.add('open');$('cameraStatus').textContent = 'Checking camera access...';
+
+            if (!window.isSecureContext) { $('cameraStatus').textContent = 'Camera access requires HTTPS.'; return; }
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $('cameraStatus').textContent = 'Camera is unavailable. Allow camera access in browser.'; return; }
+
+            try {
+                scanner = new ZXingBrowser.BrowserMultiFormatReader();
+                await startCamera();
+            } catch (error) {
+                $('cameraStatus').textContent = 'Unable to start scanner: ' + errorText(error);
+            }
+        }
+
+        async function startCamera() {
+            stopCamera();
+            if (!scanner) return;
+            $('cameraStatus').textContent = 'Requesting camera permission...';
+
+            try {
+                cameraControls = await scanner.decodeFromConstraints(
+                    { video: { facingMode: { ideal: cameraFacing } } },
+                    $('cameraVideo'),
+                    (result, error) => {
+                        if (result && scanTarget) {
+                            const code = result.getText();
+                            if (code) {
+                                scanTarget.value = code;
+                                scanTarget.dispatchEvent(new Event('input', {bubbles: true}));
+                                scanTarget.dispatchEvent(new Event('change', {bubbles: true}));
+                                closeScanner();
+                            }
+                        }
+                    }
+                );
+                $('cameraStatus').textContent = 'Camera ready. Hold the barcode steady.';
+            } catch (error) {
+                let message = errorText(error);
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') { message = 'Camera permission denied. Allow camera access, then retry.'; } 
+                else if (error.name === 'NotFoundError') { message = 'No camera was found on this device.'; } 
+                else if (error.name === 'NotReadableError') { message = 'The camera may be in use by another app.'; }
+                $('cameraStatus').textContent = message;
+            }
+        }
+
+        function stopCamera() {
+            if (cameraControls) { try { cameraControls.stop(); } catch (e) {} cameraControls = null; }
+            if (scanner && typeof scanner.reset === 'function') { try { scanner.reset(); } catch (e) {} }
+            const video = $('cameraVideo');
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function closeScanner() {
+            stopCamera();
+            $('cameraOverlay').classList.remove('open');
+            if (scanTarget) { scanTarget.focus(); }
+        }
+
+        $('closeCameraBtn').addEventListener('click', closeScanner);$('switchCameraBtn').addEventListener('click', async () => {
+            cameraFacing = cameraFacing === 'environment' ? 'user' : 'environment';
+            await startCamera();
+        });
+        // ------------------------------------
+
+        function saveForm(event) {
+            event.preventDefault();
+            if (saving) return;
+            clearMessage();
+
+            const lines = [...document.querySelectorAll('.barcode-line')].map(line => ({
+                barcode: line.querySelector('.line-barcode').value.trim(),
+                facings: line.querySelector('.line-facings').value.trim(),
+                position: line.querySelector('.line-position').value.trim()
+            }));
+
+            if (!lines.length || lines.some(line => !line.barcode || !line.facings || !line.position || !/^\d+$/.test(line.facings) || Number(line.facings) < 1)) {
+                showMessage('Complete Barcode, valid Facings and Position for every line.', 'error');
+                return;
+            }
+
+            if (fields.some(field => !$(field.id).value) \vert{}\vert{} !$('shelfId').value) {
+                $('locationPanel').classList.add('open');$('locationBtn').textContent = 'Hide Shelf Location ▲';
+                showMessage('Select all shelf location options before saving.', 'error');
+                return;
+            }
+
+            const location = { shelfId: $('shelfId').value };
+            fields.forEach(field => location[field.key] = $(field.id).value);
+            const payload = lines.map(line => ({...line, ...location}));
+
+            saving = true;
+            $('saveBtn').disabled = true;
+            $('nextBtn').disabled = true;
+            $('saveBtn').textContent = 'Saving...';
+
+            // Send via text/plain to avoid Google Apps Script CORS preflight blocks
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.error) throw new Error(result.error);
+                saving = false;
+                $('saveBtn').disabled = false;
+                $('nextBtn').disabled = false;
+                $('saveBtn').textContent = 'Save All SKUs';
+                showMessage(result.message || 'Saved successfully.', 'success');
+                $('barcodeLines').replaceChildren(makeBarcodeLine());
+                renumberLines();
+                loadRecords();
+                $('barcodeLines').querySelector('.line-barcode').focus();
+            })
+            .catch(error => {
+                saving = false;
+                $('saveBtn').disabled = false;
+                $('nextBtn').disabled = false;
+                $('saveBtn').textContent = 'Save All SKUs';
+                showMessage('Save failed: ' + errorText(error), 'error');
+            });
+        }
+
+        function clearForm() {
+            $('barcodeLines').replaceChildren(makeBarcodeLine());
+            renumberLines();
+            fields.forEach((field, index) => { fillSelect($(field.id), [], field.label);$(field.id).disabled = index !== 0; });
+            $('shelfId').value = '';$('fixtureAuto').value = '';
+            $('locationPanel').classList.remove('open');$('locationBtn').textContent = 'Select Shelf Location ▼';
+            clearMessage();
+            if (shelfRows.length) loadOptions(0);
+        }
+
+        function renderRecords() {
+            const query = $('searchBox').value.trim().toLowerCase();
+            const records = allRecords.filter(r => [r.barcode, r.facings, r.position, r.shelfId, r.fixture, r.fixtureSet, r.partNo, r.zone, r.zoneNo, r.side, r.tierNo, r.savedAt].some(v => String(v || '').toLowerCase().includes(query)));
+            $('recordCount').textContent = records.length + ' record(s)';
+            const body = $('recordsBody');
+            body.replaceChildren();
+
+            if (!records.length) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 13;
+                td.className = 'empty';
+                td.textContent = query ? 'No matching records.' : 'No saved records yet.';
+                tr.appendChild(td);
+                body.appendChild(tr);
+                return;
+            }
+
+            records.forEach((record, index) => {
+                const tr = document.createElement('tr');
+                [index + 1, record.barcode, record.facings, record.position, record.shelfId, record.fixture, record.fixtureSet, record.partNo, record.zone, record.zoneNo, record.side, record.tierNo, record.savedAt].forEach(val => {
+                    const td = document.createElement('td');
+                    td.textContent = val == null ? '' : String(val);
+                    tr.appendChild(td);
+                });
+                body.appendChild(tr);
+            });
+        }
+
+        function loadRecords() {
+            $('recordCount').textContent = 'Loading records...';$('refreshBtn').disabled = true;
+
+            fetch(`${API_URL}?action=getSkuRecords`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    allRecords = Array.isArray(data) ? data : [];
+                    renderRecords();
+                    $('refreshBtn').disabled = false;
+                })
+                .catch(error => {
+                    $('recordCount').textContent = 'Could not load records: ' + errorText(error);$('refreshBtn').disabled = false;
+                });
+        }
+
+        fields.forEach((field, index) => {
+            $(field.id).addEventListener('change', () => {
+                clearMessage();
+                resetLocationFields(index + 1);
+                loadOptions(index + 1);
+                updateShelf();
+            });
+        });
+
+        $('nextBtn').addEventListener('click', addLine);$('skuForm').addEventListener('submit', saveForm);
+        $('clearBtn').addEventListener('click', clearForm);$('reloadBtn').addEventListener('click', loadShelfMaster);
+        $('refreshBtn').addEventListener('click', loadRecords);$('searchBox').addEventListener('input', renderRecords);
+
+        $('locationBtn').addEventListener('click', () => {
+            const opening = !$('locationPanel').classList.contains('open');
+            $('locationPanel').classList.toggle('open', opening);$('locationBtn').textContent = opening ? 'Hide Shelf Location ▲' : 'Select Shelf Location ▼';
+            if (opening) $('locationPanel').scrollIntoView({behavior:'smooth', block:'start'});
+        });
+
+        $('barcodeLines').appendChild(makeBarcodeLine());
+        renumberLines();
+        loadShelfMaster();
+        loadRecords();
+    </script>
+</body>
+</html>
