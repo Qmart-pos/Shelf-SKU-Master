@@ -1452,159 +1452,94 @@
        POST : normal HTML form into a hidden iframe + postMessage response
        ------------------------------------------------------------------------- */
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0iGm3rz_Tdep5U8QFzncZYMB6ix6Ko6KCZ62MT2ba4eDHnbc4eNTMBjHuFxIyiHD-oQ/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwLVDXjoxz7h1G5WLiy0SSrT-qKpA2dxEzO1iaXsLYKTPglD0pBG5IFJzdaribpK9RIA/exec';
 
-    let pendingSaveRequest = null;
-
+    // JSONP helper for reading shelf master and saved SKU records.
     function apiGet(action) {
       return new Promise((resolve, reject) => {
-        const callbackName = '__qmartJsonp_' + Date.now() + '_' +
+        const callbackName = '__qmartGet_' + Date.now() + '_' +
           Math.random().toString(36).slice(2);
-
         const script = document.createElement('script');
-        const cleanup = () => {
-          script.remove();
-          try {
-            delete window[callbackName];
-          } catch (e) {
-            window[callbackName] = undefined;
-          }
-        };
+        let finished = false;
 
-        const timeout = setTimeout(() => {
+        const cleanup = () => {
+          clearTimeout(timeout);
+          script.remove();
+          try { delete window[callbackName]; }
+          catch (_) { window[callbackName] = undefined; }
+        };
+        const fail = error => {
+          if (finished) return;
+          finished = true;
           cleanup();
-          reject(new Error('Apps Script request timed out.'));
-        }, 30000);
+          reject(error instanceof Error ? error : new Error(String(error)));
+        };
+        const timeout = setTimeout(() =>
+          fail(new Error(action + ' request timed out.')), 30000);
 
         window[callbackName] = response => {
-          clearTimeout(timeout);
+          if (finished) return;
+          finished = true;
           cleanup();
-
           if (!response || response.ok !== true) {
-            reject(new Error(
-              response && response.error
-                ? response.error
-                : 'Apps Script returned an invalid response.'
-            ));
+            reject(new Error(response && response.error ? response.error :
+              'Apps Script returned an invalid response for ' + action + '.'));
             return;
           }
-
           resolve(response.data);
         };
 
-        script.onerror = () => {
-          clearTimeout(timeout);
-          cleanup();
-          reject(new Error(
-            'Could not reach the Apps Script web app. Check that the deployment is '
-            + 'set to "Anyone" and that the /exec URL is current.'
-          ));
-        };
-
-        script.src =
-          APPS_SCRIPT_URL +
+        script.onerror = () => fail(new Error(
+          'Could not reach Apps Script for ' + action + '. Check the deployed /exec URL and access settings.'));
+        script.src = APPS_SCRIPT_URL +
           '?action=' + encodeURIComponent(action) +
           '&callback=' + encodeURIComponent(callbackName) +
           '&_=' + Date.now();
-
         document.head.appendChild(script);
       });
     }
 
-    window.addEventListener('message', event => {
-      const message = event.data;
-
-      if (!message || message.source !== 'qmart-apps-script') return;
-      if (message.type !== 'saveResult') return;
-
-      if (!pendingSaveRequest) return;
-      if (message.requestId !== pendingSaveRequest.requestId) return;
-
-      const request = pendingSaveRequest;
-      pendingSaveRequest = null;
-
-      if (request.iframe && request.iframe.parentNode) {
-        request.iframe.remove();
-      }
-
-      if (message.ok) {
-        request.resolve(message.data);
-      } else {
-        request.reject(new Error(message.error || 'Save failed.'));
-      }
-    });
-
+    // Save through JSONP GET instead of a hidden iframe POST.
+    // This avoids the Apps Script redirect/sandbox postMessage timeout.
     function apiPost(payload) {
       return new Promise((resolve, reject) => {
-        if (pendingSaveRequest) {
-          reject(new Error('Another save request is already in progress.'));
-          return;
-        }
-
-        const requestId =
-          'save_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-
-        const iframe = document.createElement('iframe');
-        iframe.name = 'qmart_save_' + requestId;
-        iframe.style.display = 'none';
-        iframe.setAttribute('aria-hidden', 'true');
-
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = APPS_SCRIPT_URL;
-        form.target = iframe.name;
-        form.style.display = 'none';
-
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'payload';
-        input.value = JSON.stringify({
-          requestId,
-          rows: payload
-        });
-
-        form.appendChild(input);
-        document.body.appendChild(iframe);
-        document.body.appendChild(form);
-
-        pendingSaveRequest = {
-          requestId,
-          iframe,
-          resolve,
-          reject
+        const callbackName = '__qmartSave_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        const script = document.createElement('script');
+        let finished = false;
+        const cleanup = () => {
+          script.remove();
+          try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
         };
-
-        const timeout = setTimeout(() => {
-          if (!pendingSaveRequest ||
-            pendingSaveRequest.requestId !== requestId) {
+        const finishError = err => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(timeout);
+          cleanup();
+          reject(err instanceof Error ? err : new Error(String(err)));
+        };
+        const timeout = setTimeout(() => finishError(new Error('Save request timed out. Check Apps Script Executions before retrying.')), 30000);
+        window[callbackName] = response => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(timeout);
+          cleanup();
+          if (!response || response.ok !== true) {
+            reject(new Error(response && response.error ? response.error : 'Apps Script returned an invalid save response.'));
             return;
           }
-
-          pendingSaveRequest = null;
-
-          if (iframe.parentNode) iframe.remove();
-          if (form.parentNode) form.remove();
-
-          reject(new Error('Save request timed out.'));
-        }, 25000);
-
-        // Wrap the promise handlers so the timeout is cancelled on completion.
-        const originalResolve = resolve;
-        const originalReject = reject;
-
-        pendingSaveRequest.resolve = value => {
-          clearTimeout(timeout);
-          if (form.parentNode) form.remove();
-          originalResolve(value);
+          resolve(response.data);
         };
-
-        pendingSaveRequest.reject = error => {
-          clearTimeout(timeout);
-          if (form.parentNode) form.remove();
-          originalReject(error);
-        };
-
-        form.submit();
+        script.onerror = () => finishError(new Error('Could not reach Apps Script. Confirm the deployed /exec URL and access settings.'));
+        const envelope = { rows: payload };
+        const query = '?action=saveSkus&callback=' + encodeURIComponent(callbackName) +
+          '&payload=' + encodeURIComponent(JSON.stringify(envelope)) + '&_=' + Date.now();
+        const url = APPS_SCRIPT_URL + query;
+        if (url.length > 8000) {
+          finishError(new Error('Save payload is too large for GET. Use the iframe POST endpoint for this batch.'));
+          return;
+        }
+        script.src = url;
+        document.head.appendChild(script);
       });
     }
 
@@ -2259,9 +2194,10 @@
 
           showMessage(successText + ' Form cleared and ready for the next entry.', 'success');
 
-          // Reset and report success immediately. Refresh saved records shortly afterward.
-          $('barcodeLines').querySelector('.line-barcode').focus();
-          window.setTimeout(() => loadRecords(), 150);
+          // Reset and report success immediately. Refresh saved records in the background.
+          const firstBarcode = $('barcodeLines').querySelector('.line-barcode');
+          if (firstBarcode) firstBarcode.focus();
+          window.setTimeout(() => loadRecords(), 0);
         })
 
         .catch(error => {
@@ -2292,8 +2228,10 @@
       renumberLines();
 
       fields.forEach((field, index) => {
-        fillSelect($(field.id), [], field.label);
-        $(field.id).disabled = index !== 0;
+        const select = $(field.id);
+        fillSelect(select, [], field.label);
+        select.value = '';
+        select.disabled = index !== 0;
       });
 
       $('shelfId').value = '';
@@ -2301,10 +2239,8 @@
       $('locationPanel').classList.remove('open');
       $('locationBtn').textContent = 'Select Shelf Location ▼';
 
-      // Rebuild the first dropdown from cached data; no server request is needed.
-      if (shelfRows.length) {
-        loadOptions(0);
-      }
+      // Rebuild options from the in-memory shelf master; do not call the server.
+      if (shelfRows.length) loadOptions(0);
     }
 
     function clearForm() {
