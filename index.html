@@ -1452,7 +1452,7 @@
        POST : normal HTML form into a hidden iframe + postMessage response
        ------------------------------------------------------------------------- */
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyX_XXvs0a1GZeJo0YYhC7ObsGrc7oOVRkyxadMHN1dN0_n1Wi_WSRig2ozwcgg783zrA/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0iGm3rz_Tdep5U8QFzncZYMB6ix6Ko6KCZ62MT2ba4eDHnbc4eNTMBjHuFxIyiHD-oQ/exec';
 
     let pendingSaveRequest = null;
 
@@ -1586,7 +1586,7 @@
           if (form.parentNode) form.remove();
 
           reject(new Error('Save request timed out.'));
-        }, 45000);
+        }, 25000);
 
         // Wrap the promise handlers so the timeout is cancelled on completion.
         const originalResolve = resolve;
@@ -2239,35 +2239,29 @@
       apiPost(payload)
 
         .then(result => {
-
+          // Re-enable controls as soon as the server confirms the save.
           saving = false;
-
           $('saveBtn').disabled = false;
-
           $('nextBtn').disabled = false;
-
           $('saveBtn').textContent = 'Save All SKUs';
 
+          // Clear the form locally; do not fetch Shelf_Master again.
+          resetFormAfterSuccessfulSave();
 
-
-          showMessage(
-
-            result && result.message ? result.message : 'Saved successfully.',
-
-            'success'
-
+          const savedCount = Number(
+            result && (result.savedCount ?? result.count)
           );
+          const successText = result && result.message
+            ? result.message
+            : 'Success! ' + (Number.isFinite(savedCount) && savedCount > 0
+                ? savedCount
+                : lines.length) + ' SKU record(s) saved successfully.';
 
+          showMessage(successText + ' Form cleared and ready for the next entry.', 'success');
 
-
-          $('barcodeLines').replaceChildren(makeBarcodeLine());
-
-          renumberLines();
-
-          loadRecords();
-
+          // Reset and report success immediately. Refresh saved records shortly afterward.
           $('barcodeLines').querySelector('.line-barcode').focus();
-
+          window.setTimeout(() => loadRecords(), 150);
         })
 
         .catch(error => {
@@ -2289,6 +2283,29 @@
     }
 
 
+
+    // Fast local reset after a successful save. Reuses the already-loaded shelfRows.
+    function resetFormAfterSuccessfulSave() {
+      closeScanner();
+
+      $('barcodeLines').replaceChildren(makeBarcodeLine());
+      renumberLines();
+
+      fields.forEach((field, index) => {
+        fillSelect($(field.id), [], field.label);
+        $(field.id).disabled = index !== 0;
+      });
+
+      $('shelfId').value = '';
+      $('fixtureAuto').value = '';
+      $('locationPanel').classList.remove('open');
+      $('locationBtn').textContent = 'Select Shelf Location ▼';
+
+      // Rebuild the first dropdown from cached data; no server request is needed.
+      if (shelfRows.length) {
+        loadOptions(0);
+      }
+    }
 
     function clearForm() {
 
