@@ -6,806 +6,807 @@
 
 <head>
 
-  <base target="_top">
+    <base target="_top">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <script src="https://cdn.jsdelivr.net/npm/@zxing/browser@latest/umd/zxing-browser.min.js"
-    onerror="this.onerror=null; this.src='https://unpkg.com/@zxing/browser@latest/umd/zxing-browser.min.js';"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/browser@latest/umd/zxing-browser.min.js"
+        onerror="this.onerror=null; this.src='https://unpkg.com/@zxing/browser@latest/umd/zxing-browser.min.js';">
+    </script>
 
-  <style>
-    * {
+    <style>
+        * {
 
-      box-sizing: border-box;
+            box-sizing: border-box;
 
-    }
+        }
 
 
 
-    :root {
+        :root {
 
-      --blue: #2457d6;
+            --blue: #2457d6;
 
-      --dark: #10203e;
+            --dark: #10203e;
 
-      --bg: #f3f6fb;
+            --bg: #f3f6fb;
 
-      --border: #dce3ee;
+            --border: #dce3ee;
 
-    }
+        }
 
 
 
-    body {
+        body {
 
-      margin: 0;
+            margin: 0;
 
-      width: 100%;
+            width: 100%;
 
-      font-family: Arial, sans-serif;
+            font-family: Arial, sans-serif;
 
-      color: #1c2940;
+            color: #1c2940;
 
-      background: var(--bg);
+            background: var(--bg);
 
-      overflow-x: hidden;
+            overflow-x: hidden;
 
-    }
+        }
 
 
 
-    header {
+        header {
 
-      padding: 20px 16px;
+            padding: 20px 16px;
 
-      color: white;
+            color: white;
 
-      background: linear-gradient(120deg, #10203e, #2457a7);
+            background: linear-gradient(120deg, #10203e, #2457a7);
 
-    }
+        }
 
 
 
-    header h1 {
+        header h1 {
 
-      margin: 0 0 7px;
+            margin: 0 0 7px;
 
-      font-size: 21px;
+            font-size: 21px;
 
-    }
+        }
 
 
 
-    header p {
+        header p {
 
-      margin: 0;
+            margin: 0;
 
-      font-size: 12px;
+            font-size: 12px;
 
-      color: #dbe6ff;
+            color: #dbe6ff;
 
-    }
+        }
 
 
 
-    main {
+        main {
 
-      width: 100%;
+            width: 100%;
 
-      max-width: 1100px;
+            max-width: 1100px;
 
-      margin: auto;
+            margin: auto;
 
-      padding: 14px;
+            padding: 14px;
 
-    }
+        }
 
 
 
-    .card {
+        .card {
 
-      width: 100%;
+            width: 100%;
 
-      min-width: 0;
+            min-width: 0;
 
-      background: white;
+            background: white;
 
-      border: 1px solid var(--border);
+            border: 1px solid var(--border);
 
-      border-radius: 14px;
+            border-radius: 14px;
 
-      padding: 18px;
+            padding: 18px;
 
-      margin-bottom: 16px;
+            margin-bottom: 16px;
 
-      box-shadow: 0 4px 16px #182c5008;
+            box-shadow: 0 4px 16px #182c5008;
 
-    }
+        }
 
 
 
-    h2 {
+        h2 {
 
-      font-size: 19px;
+            font-size: 19px;
 
-      margin: 0;
+            margin: 0;
 
-    }
+        }
 
 
 
-    .sub {
+        .sub {
 
-      color: #718097;
+            color: #718097;
 
-      font-size: 13px;
+            font-size: 13px;
 
-      margin-top: 7px;
+            margin-top: 7px;
 
-    }
+        }
 
 
 
-    button {
+        button {
 
-      min-height: 46px;
+            min-height: 46px;
 
-      border: 0;
+            border: 0;
 
-      border-radius: 10px;
+            border-radius: 10px;
 
-      padding: 12px 15px;
+            padding: 12px 15px;
 
-      font-size: 14px;
+            font-size: 14px;
 
-      font-weight: bold;
+            font-weight: bold;
 
-      cursor: pointer;
+            cursor: pointer;
 
-      touch-action: manipulation;
+            touch-action: manipulation;
 
-    }
+        }
 
 
 
-    button:disabled {
+        button:disabled {
 
-      opacity: .55;
+            opacity: .55;
 
-      cursor: not-allowed;
+            cursor: not-allowed;
 
-    }
+        }
 
 
 
-    .primary {
+        .primary {
 
-      background: var(--blue);
+            background: var(--blue);
 
-      color: white;
+            color: white;
 
-    }
+        }
 
 
 
-    .secondary {
+        .secondary {
 
-      background: #eaf0fb;
+            background: #eaf0fb;
 
-      color: #214b9e;
+            color: #214b9e;
 
-    }
+        }
 
 
 
-    .outline {
+        .outline {
 
-      background: white;
+            background: white;
 
-      color: #26364e;
+            color: #26364e;
 
-      border: 1px solid var(--border);
+            border: 1px solid var(--border);
 
-    }
+        }
 
 
 
-    .danger {
+        .danger {
 
-      background: #fff0f0;
+            background: #fff0f0;
 
-      color: #a32424;
+            color: #a32424;
 
-    }
+        }
 
 
 
-    .actions {
+        .actions {
 
-      display: flex;
+            display: flex;
 
-      flex-wrap: wrap;
+            flex-wrap: wrap;
 
-      gap: 10px;
+            gap: 10px;
 
-      margin-top: 16px;
+            margin-top: 16px;
 
-    }
+        }
 
 
 
-    .actions button {
+        .actions button {
 
-      flex: 1 1 180px;
+            flex: 1 1 180px;
 
-    }
+        }
 
 
 
-    .barcode-line {
+        .barcode-line {
 
-      min-width: 0;
+            min-width: 0;
 
-      padding: 14px;
+            padding: 14px;
 
-      margin-top: 14px;
+            margin-top: 14px;
 
-      background: #fbfcff;
+            background: #fbfcff;
 
-      border: 1px solid var(--border);
+            border: 1px solid var(--border);
 
-      border-radius: 12px;
+            border-radius: 12px;
 
-    }
+        }
 
 
 
-    .line-title {
+        .line-title {
 
-      font-size: 14px;
+            font-size: 14px;
 
-      font-weight: bold;
+            font-weight: bold;
 
-      color: #2457a7;
+            color: #2457a7;
 
-      margin-bottom: 12px;
+            margin-bottom: 12px;
 
-    }
+        }
 
 
 
-    .line-fields {
+        .line-fields {
 
-      display: grid;
+            display: grid;
 
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
 
-      gap: 12px;
+            gap: 12px;
 
-    }
+        }
 
 
 
-    label {
+        label {
 
-      display: block;
+            display: block;
 
-      font-size: 13px;
+            font-size: 13px;
 
-      font-weight: bold;
+            font-weight: bold;
 
-      margin-bottom: 7px;
+            margin-bottom: 7px;
 
-    }
+        }
 
 
 
-    input,
+        input,
 
-    select {
+        select {
 
-      width: 100%;
+            width: 100%;
 
-      min-width: 0;
+            min-width: 0;
 
-      height: 46px;
+            height: 46px;
 
-      padding: 0 11px;
+            padding: 0 11px;
 
-      border: 1px solid #cbd5e3;
+            border: 1px solid #cbd5e3;
 
-      border-radius: 9px;
+            border-radius: 9px;
 
-      background: white;
+            background: white;
 
-      color: #1c2940;
+            color: #1c2940;
 
-      font-size: 16px;
+            font-size: 16px;
 
-    }
+        }
 
 
 
-    input:focus,
+        input:focus,
 
-    select:focus {
+        select:focus {
 
-      outline: 2px solid #d9e5ff;
+            outline: 2px solid #d9e5ff;
 
-      border-color: var(--blue);
+            border-color: var(--blue);
 
-    }
+        }
 
 
 
-    input[readonly] {
+        input[readonly] {
 
-      background: #edf3ff;
+            background: #edf3ff;
 
-    }
+        }
 
 
 
-    .barcode-entry {
+        .barcode-entry {
 
-      display: flex;
+            display: flex;
 
-      gap: 7px;
+            gap: 7px;
 
-      align-items: center;
+            align-items: center;
 
-    }
+        }
 
 
 
-    .barcode-entry input {
+        .barcode-entry input {
 
-      flex: 1;
+            flex: 1;
 
-      width: 100%;
+            width: 100%;
 
-    }
+        }
 
 
 
-    .scan-btn {
+        .scan-btn {
 
-      flex: 0 0 auto;
+            flex: 0 0 auto;
 
-      padding: 10px 12px;
+            padding: 10px 12px;
 
-    }
+        }
 
 
 
-    .line-actions {
+        .line-actions {
 
-      display: flex;
+            display: flex;
 
-      justify-content: flex-end;
+            justify-content: flex-end;
 
-      margin-top: 12px;
+            margin-top: 12px;
 
-    }
+        }
 
 
 
-    #locationPanel {
+        #locationPanel {
 
-      display: none;
+            display: none;
 
-    }
+        }
 
 
 
-    #locationPanel.open {
+        #locationPanel.open {
 
-      display: block;
+            display: block;
 
-    }
+        }
 
 
 
-    .location-grid {
+        .location-grid {
 
-      display: grid;
+            display: grid;
 
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
 
-      gap: 14px;
+            gap: 14px;
 
-      margin-top: 18px;
+            margin-top: 18px;
 
-    }
+        }
 
 
 
-    .section-label {
+        .section-label {
 
-      grid-column: 1/-1;
+            grid-column: 1/-1;
 
-      font-size: 12px;
+            font-size: 12px;
 
-      font-weight: bold;
+            font-weight: bold;
 
-      text-transform: uppercase;
+            text-transform: uppercase;
 
-      letter-spacing: .5px;
+            letter-spacing: .5px;
 
-      color: #51617a;
+            color: #51617a;
 
-      padding-bottom: 9px;
+            padding-bottom: 9px;
 
-      border-bottom: 1px solid #e6ebf3;
+            border-bottom: 1px solid #e6ebf3;
 
-    }
+        }
 
 
 
-    .message {
+        .message {
 
-      display: none;
+            display: none;
 
-      padding: 12px;
+            padding: 12px;
 
-      border-radius: 9px;
+            border-radius: 9px;
 
-      margin-top: 14px;
+            margin-top: 14px;
 
-      font-size: 14px;
+            font-size: 14px;
 
-      overflow-wrap: anywhere;
+            overflow-wrap: anywhere;
 
-    }
+        }
 
 
 
-    .success {
+        .success {
 
-      display: block;
+            display: block;
 
-      background: #e8f7ee;
+            background: #e8f7ee;
 
-      color: #11643b;
+            color: #11643b;
 
-    }
+        }
 
 
 
-    .error {
+        .error {
 
-      display: block;
+            display: block;
 
-      background: #fff0f0;
+            background: #fff0f0;
 
-      color: #a32424;
+            color: #a32424;
 
-    }
+        }
 
 
 
-    .info {
+        .info {
 
-      display: block;
+            display: block;
 
-      background: #edf4ff;
+            background: #edf4ff;
 
-      color: #254d8e;
+            color: #254d8e;
 
-    }
+        }
 
 
 
-    .toolbar {
+        .toolbar {
 
-      display: flex;
+            display: flex;
 
-      gap: 10px;
+            gap: 10px;
 
-      margin-top: 16px;
+            margin-top: 16px;
 
-    }
+        }
 
 
 
-    .toolbar input {
+        .toolbar input {
 
-      flex: 1;
+            flex: 1;
 
-    }
+        }
 
 
 
-    .table-wrap {
+        .table-wrap {
 
-      overflow-x: auto;
+            overflow-x: auto;
 
-      margin-top: 14px;
+            margin-top: 14px;
 
-    }
+        }
 
 
 
-    table {
+        table {
 
-      width: 100%;
+            width: 100%;
 
-      min-width: 1000px;
+            min-width: 1000px;
 
-      border-collapse: collapse;
+            border-collapse: collapse;
 
-      font-size: 13px;
+            font-size: 13px;
 
-    }
+        }
 
 
 
-    th,
+        th,
 
-    td {
+        td {
 
-      text-align: left;
+            text-align: left;
 
-      padding: 10px;
+            padding: 10px;
 
-      border-bottom: 1px solid #e8edf4;
+            border-bottom: 1px solid #e8edf4;
 
-      white-space: nowrap;
+            white-space: nowrap;
 
-    }
+        }
 
 
 
-    th {
+        th {
 
-      background: #f5f7fb;
+            background: #f5f7fb;
 
-      font-size: 11px;
+            font-size: 11px;
 
-    }
+        }
 
 
 
-    .count {
+        .count {
 
-      color: #718097;
+            color: #718097;
 
-      font-size: 13px;
+            font-size: 13px;
 
-      margin-top: 12px;
+            margin-top: 12px;
 
-    }
+        }
 
 
 
-    .empty {
+        .empty {
 
-      text-align: center;
+            text-align: center;
 
-      padding: 24px;
+            padding: 24px;
 
-      color: #718097;
+            color: #718097;
 
-    }
+        }
 
 
 
-    .camera-overlay {
+        .camera-overlay {
 
-      display: none;
+            display: none;
 
-      position: fixed;
+            position: fixed;
 
-      inset: 0;
+            inset: 0;
 
-      z-index: 9999;
+            z-index: 9999;
 
-      background: #07101e;
+            background: #07101e;
 
-      color: white;
+            color: white;
 
-      padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+            padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
 
-      overflow-y: auto;
+            overflow-y: auto;
 
-    }
+        }
 
 
 
-    .camera-overlay.open {
+        .camera-overlay.open {
 
-      display: flex;
+            display: flex;
 
-      flex-direction: column;
+            flex-direction: column;
 
-      align-items: center;
+            align-items: center;
 
-    }
+        }
 
 
 
-    .camera-inner {
+        .camera-inner {
 
-      width: 100%;
+            width: 100%;
 
-      max-width: 600px;
+            max-width: 600px;
 
-    }
+        }
 
 
 
-    .camera-inner h2 {
+        .camera-inner h2 {
 
-      margin: 12px 0;
+            margin: 12px 0;
 
-    }
+        }
 
 
 
-    #cameraVideo {
+        #cameraVideo {
 
-      width: 100%;
+            width: 100%;
 
-      max-height: 60vh;
+            max-height: 60vh;
 
-      min-height: 220px;
+            min-height: 220px;
 
-      object-fit: cover;
+            object-fit: cover;
 
-      background: black;
+            background: black;
 
-      border-radius: 14px;
+            border-radius: 14px;
 
-      margin-top: 12px;
+            margin-top: 12px;
 
-    }
+        }
 
 
 
-    #cameraStatus {
+        #cameraStatus {
 
-      margin: 12px 0;
+            margin: 12px 0;
 
-      font-size: 14px;
+            font-size: 14px;
 
-      overflow-wrap: anywhere;
+            overflow-wrap: anywhere;
 
-    }
+        }
 
 
 
-    .camera-actions {
+        .camera-actions {
 
-      display: flex;
+            display: flex;
 
-      gap: 10px;
+            gap: 10px;
 
-      width: 100%;
+            width: 100%;
 
-    }
+        }
 
 
 
-    .camera-actions button {
+        .camera-actions button {
 
-      flex: 1;
+            flex: 1;
 
-    }
+        }
 
 
 
-    footer {
+        footer {
 
-      text-align: center;
+            text-align: center;
 
-      color: #8490a4;
+            color: #8490a4;
 
-      font-size: 12px;
+            font-size: 12px;
 
-      padding: 8px 12px 22px;
+            padding: 8px 12px 22px;
 
-    }
+        }
 
 
 
-    @media(max-width:650px) {
+        @media(max-width:650px) {
 
-      header {
+            header {
 
-        padding: 17px 14px;
+                padding: 17px 14px;
 
-      }
+            }
 
 
 
-      header h1 {
+            header h1 {
 
-        font-size: 18px;
+                font-size: 18px;
 
-      }
+            }
 
 
 
-      main {
+            main {
 
-        padding: 9px;
+                padding: 9px;
 
-      }
+            }
 
 
 
-      .card {
+            .card {
 
-        padding: 13px;
+                padding: 13px;
 
-        border-radius: 11px;
+                border-radius: 11px;
 
-      }
+            }
 
 
 
-      .line-fields,
+            .line-fields,
 
-      .location-grid {
+            .location-grid {
 
-        grid-template-columns: minmax(0, 1fr);
+                grid-template-columns: minmax(0, 1fr);
 
-        gap: 12px;
+                gap: 12px;
 
-      }
+            }
 
 
 
-      .actions {
+            .actions {
 
-        flex-direction: column;
+                flex-direction: column;
 
-      }
+            }
 
 
 
-      .actions button {
+            .actions button {
 
-        width: 100%;
+                width: 100%;
 
-        flex: auto;
+                flex: auto;
 
-      }
+            }
 
 
 
-      .toolbar {
+            .toolbar {
 
-        flex-direction: column;
+                flex-direction: column;
 
-      }
+            }
 
 
 
-      .toolbar button {
+            .toolbar button {
 
-        width: 100%;
+                width: 100%;
 
-      }
+            }
 
 
 
-      .barcode-entry {
+            .barcode-entry {
 
-        gap: 6px;
+                gap: 6px;
 
-      }
+            }
 
 
 
-      .scan-btn {
+            .scan-btn {
 
-        padding: 10px;
+                padding: 10px;
 
-      }
+            }
 
-    }
-  </style>
+        }
+    </style>
 
 </head>
 
@@ -813,327 +814,328 @@
 
 <body>
 
-  <header>
+    <header>
 
-    <h1>Q MART | SKU LOCATION ENTRY</h1>
+        <h1>Q MART | SKU LOCATION ENTRY</h1>
 
-    <p>BARCODE SCANNING · SHELF ALLOCATION · INVENTORY</p>
+        <p>BARCODE SCANNING · SHELF ALLOCATION · INVENTORY</p>
 
-  </header>
-
-
-
-  <main>
-
-    <section class="card">
-
-      <h2>SKU Location Form</h2>
-
-      <div class="sub">Enter or scan barcodes, add multiple products, then select their shelf location.</div>
+    </header>
 
 
 
-      <form id="skuForm">
+    <main>
 
-        <div class="actions">
+        <section class="card">
 
-          <button type="button" class="secondary" id="nextBtn">+ Next / Add Barcode Line</button>
+            <h2>SKU Location Form</h2>
 
-        </div>
-
-
-
-        <div id="barcodeLines"></div>
+            <div class="sub">Enter or scan barcodes, add multiple products, then select their shelf location.</div>
 
 
 
-        <div class="actions">
+            <form id="skuForm">
 
-          <button type="button" class="outline" id="locationBtn">Select Shelf Location ▼</button>
+                <div class="actions">
 
-        </div>
+                    <button type="button" class="secondary" id="nextBtn">+ Next / Add Barcode Line</button>
 
-
-
-        <div id="locationPanel" class="card" style="margin-top:14px;">
-
-          <h2>Shelf Location Options</h2>
-
-          <div class="sub">Select Fixture first. The remaining options load from Shelf_Master.</div>
+                </div>
 
 
 
-          <div class="location-grid">
-
-            <div class="section-label">Select Shelf Location</div>
+                <div id="barcodeLines"></div>
 
 
 
-            <div>
+                <div class="actions">
 
-              <label for="fixtureLocation">Fixture *</label>
+                    <button type="button" class="outline" id="locationBtn">Select Shelf Location ▼</button>
 
-              <select id="fixtureLocation" required disabled>
+                </div>
+
+
+
+                <div id="locationPanel" class="card" style="margin-top:14px;">
+
+                    <h2>Shelf Location Options</h2>
+
+                    <div class="sub">Select Fixture first. The remaining options load from Shelf_Master.</div>
+
+
+
+                    <div class="location-grid">
+
+                        <div class="section-label">Select Shelf Location</div>
+
+
+
+                        <div>
+
+                            <label for="fixtureLocation">Fixture *</label>
+
+                            <select id="fixtureLocation" required disabled>
 
                 <option value="">Loading Fixture...</option>
 
               </select>
 
-            </div>
+                        </div>
 
 
 
-            <div>
+                        <div>
 
-              <label for="fixtureSet">Fixture Set *</label>
+                            <label for="fixtureSet">Fixture Set *</label>
 
-              <select id="fixtureSet" required disabled>
+                            <select id="fixtureSet" required disabled>
 
                 <option value="">Select Fixture Set</option>
 
               </select>
 
-            </div>
+                        </div>
 
 
 
-            <div>
+                        <div>
 
-              <label for="partNo">Part No *</label>
+                            <label for="partNo">Part No *</label>
 
-              <select id="partNo" required disabled>
+                            <select id="partNo" required disabled>
 
                 <option value="">Select Part No</option>
 
               </select>
 
-            </div>
+                        </div>
 
 
 
-            <div>
+                        <div>
 
-              <label for="zone">Zone *</label>
+                            <label for="zone">Zone *</label>
 
-              <select id="zone" required disabled>
+                            <select id="zone" required disabled>
 
                 <option value="">Select Zone</option>
 
               </select>
 
-            </div>
+                        </div>
 
 
 
-            <div>
+                        <div>
 
-              <label for="zoneNo">Zone No *</label>
+                            <label for="zoneNo">Zone No *</label>
 
-              <select id="zoneNo" required disabled>
+                            <select id="zoneNo" required disabled>
 
                 <option value="">Select Zone No</option>
 
               </select>
 
-            </div>
+                        </div>
 
 
 
-            <div>
+                        <div>
 
-              <label for="side">Side *</label>
+                            <label for="side">Side *</label>
 
-              <select id="side" required disabled>
+                            <select id="side" required disabled>
 
                 <option value="">Select Side</option>
 
               </select>
 
-            </div>
+                        </div>
 
 
 
-            <div>
+                        <div>
 
-              <label for="tierNo">Level / Tier No *</label>
+                            <label for="tierNo">Level / Tier No *</label>
 
-              <select id="tierNo" required disabled>
+                            <select id="tierNo" required disabled>
 
                 <option value="">Select Tier No</option>
 
               </select>
 
+                        </div>
+
+
+
+                        <div class="section-label">Automatic Location Details</div>
+
+
+
+                        <div>
+
+                            <label for="shelfId">Shelf ID</label>
+
+                            <input id="shelfId" readonly placeholder="Auto-filled">
+
+                        </div>
+
+
+
+                        <div>
+
+                            <label for="fixtureAuto">Fixture Detail</label>
+
+                            <input id="fixtureAuto" readonly placeholder="Auto-filled">
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="actions">
+
+                        <button type="button" class="secondary" id="reloadBtn">Reload Shelf Master</button>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="actions">
+
+                    <button type="submit" class="primary" id="saveBtn">Save All SKUs</button>
+
+                    <button type="button" class="secondary" id="clearBtn">Clear Form</button>
+
+                </div>
+
+
+
+                <div id="message" class="message" role="status" aria-live="polite"></div>
+
+            </form>
+
+        </section>
+
+
+
+        <section class="card">
+
+            <h2>Saved SKU Records</h2>
+
+            <div class="sub">Latest saved records appear first.</div>
+
+
+
+            <div class="toolbar">
+
+                <input id="searchBox" placeholder="Search barcode, Qty, shelf, zone or position">
+
+                <button type="button" class="secondary" id="refreshBtn">Refresh Records</button>
+
             </div>
 
 
 
-            <div class="section-label">Automatic Location Details</div>
+            <div class="count" id="recordCount">Loading records...</div>
 
 
 
-            <div>
+            <div class="table-wrap">
 
-              <label for="shelfId">Shelf ID</label>
+                <table>
 
-              <input id="shelfId" readonly placeholder="Auto-filled">
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Barcode</th>
+
+                            <th>Qty</th>
+
+                            <th>Facings</th>
+
+                            <th>Position</th>
+
+                            <th>Shelf ID</th>
+
+                            <th>Fixture</th>
+
+                            <th>Fixture Set</th>
+
+                            <th>Part No</th>
+
+                            <th>Zone</th>
+
+                            <th>Zone No</th>
+
+                            <th>Side</th>
+
+                            <th>Level / Tier</th>
+
+                            <th>Saved At</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="recordsBody">
+
+                        <tr>
+
+                            <td colspan="14" class="empty">Loading records...</td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
 
             </div>
 
+        </section>
+
+    </main>
 
 
-            <div>
 
-              <label for="fixtureAuto">Fixture Detail</label>
+    <footer>Q MART · SKU LOCATION MANAGEMENT</footer>
 
-              <input id="fixtureAuto" readonly placeholder="Auto-filled">
+
+
+    <div id="cameraOverlay" class="camera-overlay" role="dialog" aria-modal="true">
+
+        <div class="camera-inner">
+
+            <h2>Scan Barcode</h2>
+
+            <div>Allow camera access and hold the barcode steady inside the camera view.</div>
+
+            <video id="cameraVideo" autoplay muted playsinline></video>
+
+            <div id="cameraStatus" aria-live="polite">Starting camera...</div>
+
+            <div class="camera-actions">
+
+                <button type="button" class="primary" id="switchCameraBtn">Switch Camera</button>
+
+                <button type="button" class="danger" id="closeCameraBtn">Close Scanner</button>
 
             </div>
-
-          </div>
-
-
-
-          <div class="actions">
-
-            <button type="button" class="secondary" id="reloadBtn">Reload Shelf Master</button>
-
-          </div>
 
         </div>
-
-
-
-        <div class="actions">
-
-          <button type="submit" class="primary" id="saveBtn">Save All SKUs</button>
-
-          <button type="button" class="secondary" id="clearBtn">Clear Form</button>
-
-        </div>
-
-
-
-        <div id="message" class="message" role="status" aria-live="polite"></div>
-
-      </form>
-
-    </section>
-
-
-
-    <section class="card">
-
-      <h2>Saved SKU Records</h2>
-
-      <div class="sub">Latest saved records appear first.</div>
-
-
-
-      <div class="toolbar">
-
-        <input id="searchBox" placeholder="Search barcode, shelf, zone or position">
-
-        <button type="button" class="secondary" id="refreshBtn">Refresh Records</button>
-
-      </div>
-
-
-
-      <div class="count" id="recordCount">Loading records...</div>
-
-
-
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-
-            <tr>
-
-              <th>#</th>
-
-              <th>Barcode</th>
-
-              <th>Facings</th>
-
-              <th>Position</th>
-
-              <th>Shelf ID</th>
-
-              <th>Fixture</th>
-
-              <th>Fixture Set</th>
-
-              <th>Part No</th>
-
-              <th>Zone</th>
-
-              <th>Zone No</th>
-
-              <th>Side</th>
-
-              <th>Level / Tier</th>
-
-              <th>Saved At</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody id="recordsBody">
-
-            <tr>
-
-              <td colspan="13" class="empty">Loading records...</td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-
-  <footer>Q MART · SKU LOCATION MANAGEMENT</footer>
-
-
-
-  <div id="cameraOverlay" class="camera-overlay" role="dialog" aria-modal="true">
-
-    <div class="camera-inner">
-
-      <h2>Scan Barcode</h2>
-
-      <div>Allow camera access and hold the barcode steady inside the camera view.</div>
-
-      <video id="cameraVideo" autoplay muted playsinline></video>
-
-      <div id="cameraStatus" aria-live="polite">Starting camera...</div>
-
-      <div class="camera-actions">
-
-        <button type="button" class="primary" id="switchCameraBtn">Switch Camera</button>
-
-        <button type="button" class="danger" id="closeCameraBtn">Close Scanner</button>
-
-      </div>
 
     </div>
 
-  </div>
 
 
-
-  <script>
-
-    'use strict';
+    <script>
+        'use strict';
 
 
 
@@ -1452,7 +1454,7 @@
        POST : normal HTML form into a hidden iframe + postMessage response
        ------------------------------------------------------------------------- */
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwLVDXjoxz7h1G5WLiy0SSrT-qKpA2dxEzO1iaXsLYKTPglD0pBG5IFJzdaribpK9RIA/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbylfxwTQ7nf7a5Arqy14dIQdazrdD25WlhoyHZHNffNmYXc-U7hJSjjKt8RSDcXV02-Aw/exec';
 
     // JSONP helper for reading shelf master and saved SKU records.
     function apiGet(action) {
@@ -1701,6 +1703,22 @@
 
 
 
+      const qtyWrap = document.createElement('div');
+
+      const qtyLabel = document.createElement('label');
+      qtyLabel.textContent = 'Qty *';
+
+      const qty = document.createElement('input');
+      qty.className = 'line-qty';
+      qty.type = 'number';
+      qty.min = '1';
+      qty.step = '1';
+      qty.required = true;
+      qty.value = '1';
+      qty.placeholder = 'Qty';
+      qtyWrap.append(qtyLabel, qty);
+
+
       const facingsWrap = document.createElement('div');
 
       const facingsLabel = document.createElement('label');
@@ -1747,7 +1765,7 @@
 
 
 
-      grid.append(barcodeWrap, facingsWrap, positionWrap);
+      grid.append(barcodeWrap, qtyWrap, facingsWrap, positionWrap);
 
       line.appendChild(grid);
 
@@ -1849,6 +1867,15 @@
 
       }
 
+
+
+      const qty = last.querySelector('.line-qty').value;
+
+      if (!qty || !/^\\d+$/.test(qty) || Number(qty) < 1) {
+        last.querySelector('.line-qty').focus();
+        showMessage('Enter valid Qty before adding the next line.', 'error');
+        return;
+      }
 
 
       const facings = last.querySelector('.line-facings').value;
@@ -2077,6 +2104,8 @@
 
         barcode: line.querySelector('.line-barcode').value.trim(),
 
+        qty: line.querySelector('.line-qty').value.trim(),
+
         facings: line.querySelector('.line-facings').value.trim(),
 
         position: line.querySelector('.line-position').value.trim()
@@ -2109,6 +2138,12 @@
 
         !line.barcode ||
 
+        !line.qty ||
+
+        !/^\\d+$/.test(line.qty) ||
+
+        Number(line.qty) < 1 ||
+
         !line.facings ||
 
         !line.position ||
@@ -2119,7 +2154,7 @@
 
       )) {
 
-        showMessage('Complete Barcode, valid Facings and Position for every line.', 'error');
+        showMessage('Complete Barcode, valid Qty, Facings and Position for every line.', 'error');
 
         return;
 
@@ -2309,7 +2344,7 @@
 
       const records = allRecords.filter(record => [
 
-        record.barcode, record.facings, record.position, record.shelfId,
+        record.barcode, record.qty, record.facings, record.position, record.shelfId,
 
         record.fixture, record.fixtureSet, record.partNo, record.zone,
 
@@ -2337,7 +2372,7 @@
 
 
 
-        td.colSpan = 13;
+        td.colSpan = 14;
 
         td.className = 'empty';
 
@@ -2366,6 +2401,8 @@
           index + 1,
 
           record.barcode,
+
+          record.qty,
 
           record.facings,
 
@@ -2515,7 +2552,7 @@
 
     loadRecords();
 
-  </script>
+    </script>
 
 </body>
 
