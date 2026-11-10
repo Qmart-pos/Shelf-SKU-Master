@@ -1454,7 +1454,7 @@
        POST : normal HTML form into a hidden iframe + postMessage response
        ------------------------------------------------------------------------- */
 
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbylfxwTQ7nf7a5Arqy14dIQdazrdD25WlhoyHZHNffNmYXc-U7hJSjjKt8RSDcXV02-Aw/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFeXHg6UbhY3Q35gvcKC_cZ2eGCwFlYry4ol3usemNuLuqviqlSw6PY4GWhLzO7wsQxw/exec';
 
     // JSONP helper for reading shelf master and saved SKU records.
     function apiGet(action) {
@@ -1871,7 +1871,7 @@
 
       const qty = last.querySelector('.line-qty').value;
 
-      if (!qty || !/^\\d+$/.test(qty) || Number(qty) < 1) {
+        if (!qty || !/^\d+$/.test(qty) || Number(qty) < 1) {
         last.querySelector('.line-qty').focus();
         showMessage('Enter valid Qty before adding the next line.', 'error');
         return;
@@ -2133,32 +2133,13 @@
       const lines = collectLines();
 
 
-
-      if (!lines.length || lines.some(line =>
-
-        !line.barcode ||
-
-        !line.qty ||
-
-        !/^\\d+$/.test(line.qty) ||
-
-        Number(line.qty) < 1 ||
-
-        !line.facings ||
-
-        !line.position ||
-
-        !/^\d+$/.test(line.facings) ||
-
-        Number(line.facings) < 1
-
-      )) {
-
-        showMessage('Complete Barcode, valid Qty, Facings and Position for every line.', 'error');
-
-        return;
-
-      }
+     if (!lines.length || lines.some(line =>
+     !line.barcode ||
+     !line.qty ||
+     !Number.isInteger(Number(line.qty)) ||
+     Number(line.qty) < 1 || !line.facings || !Number.isInteger(Number(line.      facings)) || Number(line.facings) < 1 ||
+    !line.position )) { showMessage( 'Complete Barcode, valid Qty, Facings and     Position for every line.' , 'error' );
+    return; } 
 
 
 
